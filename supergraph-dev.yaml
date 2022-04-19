@@ -1,0 +1,13 @@
+subgraphs:
+  sponsors:
+    routing_url: http://sponsors:8080
+    schema:
+      file: ../sponsors/graph/schema.graphql
+  hackers:
+    routing_url: http://hackers:8080
+    schema:
+      file: ../hackers/graph/schema.graphql
+  events:
+    routing_url: http://events:8080
+    schema:
+      file: ../events/graph/schema.graphql
