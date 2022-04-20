@@ -1,13 +1,13 @@
 subgraphs:
   sponsors:
-    routing_url: https://sponsors-service:8080
+    routing_url: https://sponsors-service:8080/query
     schema:
       file: ../knighthacks_sponsors/graph/schema.graphqls
   users:
-    routing_url: https://users-service:8080
+    routing_url: https://users-service:8080/query
     schema:
       file: ../knighthacks_users/graph/schema.graphqls
   events:
-    routing_url: https://events-service:8080
+    routing_url: https://events-service:8080/query
     schema:
       file: ../knighthacks_events/graph/schema.graphqls
