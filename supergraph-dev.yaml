@@ -2,12 +2,12 @@ subgraphs:
   sponsors:
     routing_url: http://sponsors:8080
     schema:
-      file: ../sponsors/graph/schema.graphql
-  hackers:
-    routing_url: http://hackers:8080
+      file: ../knighthacks_sponsors/graph/schema.graphqls
+  users:
+    routing_url: http://users:8080
     schema:
-      file: ../hackers/graph/schema.graphql
+      file: ../knighthacks_users/graph/schema.graphqls
   events:
     routing_url: http://events:8080
     schema:
-      file: ../events/graph/schema.graphql
+      file: ../knighthacks_events/graph/schema.graphqls
