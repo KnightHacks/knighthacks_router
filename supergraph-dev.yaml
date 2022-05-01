@@ -11,3 +11,7 @@ subgraphs:
     routing_url: http://events:8080/query
     schema:
       file: ../knighthacks_events/graph/schema.graphqls
+  hackathon:
+    routing_url: http://hackathon:8080/query
+    schema:
+      file: ../knighthacks_hackathon/graph/schema.graphqls
