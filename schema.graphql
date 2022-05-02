@@ -1,0 +1,217 @@
+schema
+  @core(feature: "https://specs.apollo.dev/core/v0.2"),
+  @core(feature: "https://specs.apollo.dev/join/v0.1", for: EXECUTION)
+{
+  query: Query
+  mutation: Mutation
+}
+
+directive @core(as: String, feature: String!, for: core__Purpose) repeatable on SCHEMA
+
+directive @join__field(graph: join__Graph, provides: join__FieldSet, requires: join__FieldSet) on FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__owner(graph: join__Graph!) on INTERFACE | OBJECT
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet) repeatable on INTERFACE | OBJECT
+
+type Event
+  @join__owner(graph: EVENTS)
+  @join__type(graph: EVENTS, key: "id")
+  @join__type(graph: HACKATHON, key: "id")
+{
+  description: String! @join__field(graph: EVENTS)
+  end_date: Time! @join__field(graph: EVENTS)
+  hackathon: Hackathon! @join__field(graph: HACKATHON)
+  id: ID! @join__field(graph: EVENTS)
+  location: String! @join__field(graph: EVENTS)
+  name: String! @join__field(graph: EVENTS)
+  start_date: Time! @join__field(graph: EVENTS)
+}
+
+type Hackathon {
+  attendees: [User!]!
+  events: [Event!]!
+  id: ID!
+  sponsors: [Sponsor!]!
+  term: Term!
+}
+
+input HackathonFilterInput {
+  semester: Semester
+  year: Int!
+}
+
+type LoginPayload {
+  accessToken: String!
+
+  """
+  If false then you must register immediately following this. Else, you are logged in and have access to your own user.
+  """
+  accountExists: Boolean!
+  user: User
+}
+
+type Mutation {
+  createEvent(input: NewEvent!): Event! @join__field(graph: EVENTS)
+  createSponsor(input: NewSponsor!): Sponsor! @join__field(graph: SPONSORS)
+  updateSponsor(id: ID!, input: UpdatedSponsor!): Sponsor! @join__field(graph: SPONSORS)
+  updateUser(id: ID!, input: NewUser!): User! @join__field(graph: USERS)
+}
+
+input NewEvent {
+  description: String!
+  end_date: Time!
+  location: String!
+  name: String!
+  start_date: Time!
+}
+
+input NewSponsor {
+  description: String
+  logo: String
+  name: String!
+  since: Time
+  tier: SubscriptionTier!
+  website: String
+}
+
+input NewUser {
+  age: Int
+  email: String!
+  firstName: String!
+  lastName: String!
+  phoneNumber: String!
+  pronouns: PronounsInput
+}
+
+type OAuth {
+  accessToken: String!
+  provider: Provider!
+}
+
+"""
+Example:
+subjective=he
+objective=him
+reflexive=himself
+"""
+type Pronouns {
+  objectivePersonal: String!
+  reflexive: String!
+  subjectivePersonal: String!
+}
+
+input PronounsInput {
+  objectivePersonal: String!
+  reflexive: String!
+  subjectivePersonal: String!
+}
+
+enum Provider {
+  GITHUB
+}
+
+type Query {
+  currentHackathon: Hackathon @join__field(graph: HACKATHON)
+  events: [Event!]! @join__field(graph: EVENTS)
+  getHackathon(id: ID!): Hackathon @join__field(graph: HACKATHON)
+  hackathons(input: HackathonFilterInput!): [Hackathon!]! @join__field(graph: HACKATHON)
+
+  """
+  The code supplied must be the code given to the frontend by the oauth flow
+  Step 1 response https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
+  """
+  login(code: String!, provider: Provider!): LoginPayload! @join__field(graph: USERS)
+  register(accessToken: String!, input: NewUser!, provider: Provider!): User! @join__field(graph: USERS)
+  sponsors(filter: SponsorFilter): [Sponsor!]! @join__field(graph: SPONSORS)
+  users: [User!]! @join__field(graph: USERS)
+}
+
+enum Semester {
+  FALL
+  SPRING
+  SUMMER
+}
+
+type Sponsor
+  @join__owner(graph: SPONSORS)
+  @join__type(graph: SPONSORS, key: "id")
+  @join__type(graph: HACKATHON, key: "id")
+{
+  description: String @join__field(graph: SPONSORS)
+  hackathons: [Hackathon!]! @join__field(graph: HACKATHON)
+  id: ID! @join__field(graph: SPONSORS)
+  logo: String @join__field(graph: SPONSORS)
+  name: String! @join__field(graph: SPONSORS)
+  since: Time! @join__field(graph: SPONSORS)
+  tier: SubscriptionTier! @join__field(graph: SPONSORS)
+  website: String @join__field(graph: SPONSORS)
+}
+
+input SponsorFilter {
+  tiers: [SubscriptionTier!]
+}
+
+enum SubscriptionTier {
+  BRONZE
+  GOLD
+  PLATINUM
+  SILVER
+}
+
+type Term {
+  semester: Semester!
+  year: Int!
+}
+
+scalar Time
+
+input UpdatedSponsor {
+  description: String
+  logo: String
+  name: String
+  since: Time
+  tier: SubscriptionTier
+  website: String
+}
+
+type User
+  @join__owner(graph: USERS)
+  @join__type(graph: USERS, key: "id")
+  @join__type(graph: USERS, key: "oAuth{accessToken}")
+  @join__type(graph: HACKATHON, key: "id")
+{
+  age: Int @join__field(graph: USERS)
+  email: String! @join__field(graph: USERS)
+  firstName: String! @join__field(graph: USERS)
+  fullName: String! @join__field(graph: USERS)
+  hackathons: [Hackathon!]! @join__field(graph: HACKATHON)
+  id: ID! @join__field(graph: USERS)
+  lastName: String! @join__field(graph: USERS)
+  oAuth: OAuth! @join__field(graph: USERS)
+  phoneNumber: String! @join__field(graph: USERS)
+  pronouns: Pronouns @join__field(graph: USERS)
+}
+
+enum core__Purpose {
+  """
+  `EXECUTION` features provide metadata necessary to for operation execution.
+  """
+  EXECUTION
+
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+}
+
+scalar join__FieldSet
+
+enum join__Graph {
+  EVENTS @join__graph(name: "events" url: "http://events:8080/query")
+  HACKATHON @join__graph(name: "hackathon" url: "http://hackathon:8080/query")
+  SPONSORS @join__graph(name: "sponsors" url: "http://sponsors:8080/query")
+  USERS @join__graph(name: "users" url: "http://users:8080/query")
+}
