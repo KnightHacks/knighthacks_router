@@ -3,3 +3,7 @@ server:
   cors:
     origins:
       - https://studio.apollographql.com
+headers:
+  all:
+    - propagate:
+        named: 'authorization'
