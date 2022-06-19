@@ -11,4 +11,4 @@ headers:
         named: 'authorization'
 plugins:
   experimental.rhai:
-    filename: /etc/config/cookie-forwarding.rhai
+    filename: /etc/config/script.rhai
