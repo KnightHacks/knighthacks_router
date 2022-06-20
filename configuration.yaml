@@ -1,9 +1,14 @@
 server:
   listen: 0.0.0.0:4000
   cors:
+    allow_credentials: true
     origins:
       - https://studio.apollographql.com
+      - http://localhost/
 headers:
   all:
     - propagate:
         named: 'authorization'
+plugins:
+  experimental.rhai:
+    filename: /etc/config/script.rhai
