@@ -12,3 +12,5 @@ headers:
 plugins:
   experimental.rhai:
     filename: /etc/config/script.rhai
+include_subgraph_errors:
+  all: true # Propagate errors from all subraphs
