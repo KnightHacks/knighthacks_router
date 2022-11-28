@@ -1,9 +1,21 @@
-server:
+supergraph:
   listen: 0.0.0.0:4000
-  cors:
-    origins:
-      - https://studio.apollographql.com
+  introspection: true
+cors:
+  allow_credentials: true
+  origins:
+    - https://studio.apollographql.com
 headers:
   all:
-    - propagate:
-        named: 'authorization'
+    request:
+      - propagate:
+          named: 'authorization'
+rhai:
+  main: "script.rhai"
+  scripts: "/etc/config/"
+sandbox:
+  enabled: true
+homepage:
+  enabled: false
+include_subgraph_errors:
+  all: true # Propagate errors from all subraphs

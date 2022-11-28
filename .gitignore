@@ -154,3 +154,5 @@ Temporary Items
 .apdisk
 
 *.iml
+
+schema.graphql
