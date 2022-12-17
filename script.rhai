@@ -1,15 +1,18 @@
 // At the router_service stage, register callbacks for processing
 // responses. We are using a closure here, but it could be a
 // function if we chose (see execution_service).
-fn router_service(service) {
+fn supergraph_service(service) {
+    print(`registered callback for service ${service}`);
     let map_callback = |response| {
         try {
             // Extract our set-cookie key from context
             // If there is no set-cookie key in our context,
             // there is no work to do.
+            print(`response.context=${response.context}`);
             if response.context["set-cookie"] != () {
-                print(`set-cookie=${response.context["set-cookie"]}`);
-                response.headers["set-cookie"] = response.context["set-cookie"];
+                let header_value = response.context["set-cookie"];
+                print(`set-cookie=${header_value}`);
+                response.headers["set-cookie"] = header_value;
             }
         }
         catch(err)
@@ -60,31 +63,25 @@ fn subgraph_service(service, subgraph) {
 // If you only wish to convert certain cookies, you
 // can add logic to modify the processing.
 fn process_request(request) {
-    print("adding cookies as headers");
 
-    try {
-        // Find our cookies
-        let cookieHeader = request.headers["cookie"];
-        print(`cookieHeader=${cookieHeader}`);
-        if cookieHeader != () {
-            let cookies = cookieHeader.split(';');
-            for cookie in cookies {
-                // Split our cookies into name and value
-                let k_v = cookie.split('=', 2);
-                if k_v.len() == 2 {
-                    // trim off any whitespace
-                    k_v[0].trim();
-                    k_v[1].trim();
-                    // update our headers
-                    // Note: we must update request.sub_headers, since we are
-                    // setting a header in our sub graph request
-                    request.sub_headers[k_v[0]] = k_v[1];
-                    print(`header key = ${k_v[0]}, value = ${k_v[1]}`);
-                }
+    // Find our cookies
+    if "cookie" in request.headers {
+        print("adding cookies as headers");
+        let cookies = request.headers["cookie"].split(';');
+        for cookie in cookies {
+            // Split our cookies into name and value
+            let k_v = cookie.split('=', 2);
+            if k_v.len() == 2 {
+                // trim off any whitespace
+                k_v[0].trim();
+                k_v[1].trim();
+                // update our headers
+                // Note: we must update subgraph.headers, since we are
+                // setting a header in our sub graph request
+                request.subgraph.headers[k_v[0]] = k_v[1];
             }
         }
-    }  catch(err) {
-       // log any errors
-       print(`something happened ${err}`);
-   }
+    } else {
+        print("no cookies in request");
+    }
 }
