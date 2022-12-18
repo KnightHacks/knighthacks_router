@@ -5,6 +5,9 @@ cors:
   allow_credentials: true
   origins:
     - https://studio.apollographql.com
+    - https://api-dev.knighthacks.org
+    - http://localhost:3000
+    - http://localhost:4000
 headers:
   all:
     request:
