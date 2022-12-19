@@ -8,6 +8,8 @@ cors:
     - https://api-dev.knighthacks.org
     - http://localhost:3000
     - http://localhost:4000
+  match_origins:
+    - "^(http|https):\/\/localhost"
 headers:
   all:
     request:
