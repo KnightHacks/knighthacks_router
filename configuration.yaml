@@ -9,7 +9,7 @@ cors:
     - http://localhost:3000
     - http://localhost:4000
   match_origins:
-    - "^(http|https):\/\/localhost"
+    - "^(http|https)://localhost"
 headers:
   all:
     request:
