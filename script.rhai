@@ -9,8 +9,8 @@ fn supergraph_service(service) {
             // If there is no set-cookie key in our context,
             // there is no work to do.
             print(`response.context=${response.context}`);
-            if response.context["set-cookie"] != () {
-                let header_value = response.context["set-cookie"];
+            if response.context["set_cookie_headers"] != () {
+                let header_value = response.context["set_cookie_headers"];
                 print(`set-cookie=${header_value}`);
                 response.headers["set-cookie"] = header_value;
             }
@@ -21,50 +21,37 @@ fn supergraph_service(service) {
             log_error(`set-cookie not created: ${err}`);
         }
     };
-    // Map our response using our closure
+  let add_cookies_to_response = |response| {
+    if response.context["set_cookie_headers"]?.len > 0 {
+      response.headers["set-cookie"] = response.context["set_cookie_headers"];
+    }
+  };
+
+    service.map_response(add_cookies_to_response);
     service.map_response(map_callback);
 }
 
-// At the subgraph_service stage, register callbacks for processing
-// responses.
-// We are going to use two closures here:
-//  - map_callback to map and manipulate the service response
-//  - resolver to provide an upserting function for the context
-//    upsert.
-// If we can't find headers or a cache-key, we don't want to fail,
-// so catch the error and log it out.
 fn subgraph_service(service, subgraph) {
-    // client cookie -> subgraph header
-    print(`registering request callback for ${subgraph}`);
+    let store_cookies_from_subgraphs = |response| {
+      if response.headers.values("set-cookie")?.len > 0 {
+        if response.context["set_cookie_headers"] == () {
+          response.context.set_cookie_headers = []
+        }
+
+        response.context.set_cookie_headers += response.headers.values("set-cookie");
+      }
+    };
+
+   print(`registering request callback for ${subgraph}`);
     const request_callback = Fn("process_request");
     service.map_request(request_callback);
 
-
-    // subgraph -> client cookie
-    let map_callback = |response| {
-        try {
-            print(`headers= ${response.headers}`);
-            let my_cache_key = response.headers["set-cookie"];
-            // Upsert our context with our resolver
-            response.context["set-cookie"] = my_cache_key;
-            print(`found set-cookie header with value: ${my_cache_key}`);
-        }
-        catch(err)
-        {
-            // Log out
-            print(`cache-key not found: ${err}`);
-        }
-    };
-    // Map our response using our closure
-    service.map_response(map_callback);
+    service.map_response(store_cookies_from_subgraphs);
 }
 
-// This will convert all cookie pairs into headers.
-// If you only wish to convert certain cookies, you
-// can add logic to modify the processing.
 fn process_request(request) {
-
     // Find our cookies
+    print(`request.headers=${request.headers}`);
     if "cookie" in request.headers {
         print("adding cookies as headers");
         let cookies = request.headers["cookie"].split(';');
