@@ -2,16 +2,13 @@
 // responses. We are using a closure here, but it could be a
 // function if we chose (see execution_service).
 fn supergraph_service(service) {
-    print(`registered callback for service ${service}`);
     let map_callback = |response| {
         try {
             // Extract our set-cookie key from context
             // If there is no set-cookie key in our context,
             // there is no work to do.
-            print(`response.context=${response.context}`);
             if response.context["set_cookie_headers"] != () {
                 let header_value = response.context["set_cookie_headers"];
-                print(`set-cookie=${header_value}`);
                 response.headers["set-cookie"] = header_value;
             }
         }
@@ -42,7 +39,6 @@ fn subgraph_service(service, subgraph) {
       }
     };
 
-   print(`registering request callback for ${subgraph}`);
     const request_callback = Fn("process_request");
     service.map_request(request_callback);
 
@@ -51,9 +47,7 @@ fn subgraph_service(service, subgraph) {
 
 fn process_request(request) {
     // Find our cookies
-    print(`request.headers=${request.headers}`);
     if "cookie" in request.headers {
-        print("adding cookies as headers");
         let cookies = request.headers["cookie"].split(';');
         for cookie in cookies {
             // Split our cookies into name and value
@@ -68,7 +62,5 @@ fn process_request(request) {
                 request.subgraph.headers[k_v[0]] = k_v[1];
             }
         }
-    } else {
-        print("no cookies in request");
     }
 }
